@@ -62,4 +62,71 @@ public class ProductRepositoryTest {
         assertEquals(product2.getProductId(), savedProduct.getProductId());
         assertFalse(productIterator.hasNext());
     }
+
+    @Test
+    void testFindByIdReturnsProduct() {
+        Product product = new Product();
+        product.setProductId("id-1");
+        product.setProductName("Sabun");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        Product found = productRepository.findById("id-1");
+
+        assertNotNull(found);
+        assertEquals("id-1", found.getProductId());
+    }
+
+    @Test
+    void testFindByIdReturnsNullWhenMissing() {
+        Product found = productRepository.findById("missing-id");
+        assertNull(found);
+    }
+
+    @Test
+    void testDeleteByIdRemovesProduct() {
+        Product product = new Product();
+        product.setProductId("id-1");
+        product.setProductName("Sabun");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        productRepository.deleteById("id-1");
+
+        assertNull(productRepository.findById("id-1"));
+        assertFalse(productRepository.findAll().hasNext());
+    }
+
+    @Test
+    void testEditUpdatesProduct() {
+        Product product = new Product();
+        product.setProductId("id-1");
+        product.setProductName("Sabun");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        Product updated = new Product();
+        updated.setProductId("id-1");
+        updated.setProductName("Sabun Baru");
+        updated.setProductQuantity(20);
+
+        Product result = productRepository.edit(updated);
+
+        assertNotNull(result);
+        Product stored = productRepository.findById("id-1");
+        assertEquals("Sabun Baru", stored.getProductName());
+        assertEquals(20, stored.getProductQuantity());
+    }
+
+    @Test
+    void testEditReturnsNullWhenMissing() {
+        Product updated = new Product();
+        updated.setProductId("missing-id");
+        updated.setProductName("Sabun Baru");
+        updated.setProductQuantity(20);
+
+        Product result = productRepository.edit(updated);
+
+        assertNull(result);
+    }
 }
