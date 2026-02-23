@@ -54,7 +54,7 @@
 
 ---
 
-## Reflection 2
+## Refleksi 2
 
 ### 1. Setelah menulis unit test, bagaimana perasaanmu? Berapa banyak unit test yang sebaiknya dibuat dalam satu class? Bagaimana memastikan unit test sudah cukup? Apakah 100% code coverage berarti tidak ada bug?
 
@@ -125,3 +125,26 @@ Jika saya membuat test suite baru yang “mirip” dengan functional test sebelu
    - Jika memungkinkan, reset state sebelum test, atau buat produk yang unik (misalnya nama berawalan timestamp/UUID) agar tidak bentrok.
 
 Dengan perbaikan di atas, menambah functional test suite tidak akan menurunkan kualitas kode, karena struktur test tetap rapi, minim duplikasi, dan mudah dipelihara.
+
+---
+
+## Refleksi 3
+
+### 1) Code quality issue(s) yang diperbaiki dan strategi perbaikannya
+
+Pada exercise ini saya memperbaiki beberapa isu kualitas kode berikut:
+- **Deprecated testing annotation**: `@MockBean` pada `ProductControllerTest` terdeteksi deprecated dan ditandai untuk removal.  
+  Strategi: mengganti ke anotasi yang direkomendasikan framework (`@MockitoBean`) agar test tetap kompatibel untuk versi Spring Boot yang lebih baru.
+- **Field injection (`@Autowired`) pada class utama**: penggunaan field injection di `ProductController` dan `ProductServiceImpl` berisiko pada testability dan maintainability.  
+  Strategi: refactor ke **constructor injection** dengan field `final` supaya dependency lebih eksplisit, lebih mudah diuji, dan lebih aman terhadap null-initialization.
+- **Mutability yang tidak perlu**: koleksi internal repository belum dibuat immutable-reference.  
+  Strategi: menjadikan referensi list sebagai `final` untuk memperjelas bahwa referensi tidak berubah setelah inisialisasi.
+
+
+Saya memakai pendekatan bertahap: identifikasi temuan dari pipeline/check, pilih issue dengan dampak terbesar pada maintainability/compatibility, lakukan perubahan kecil yang terisolasi, lalu verifikasi ulang dengan menjalankan test/check.
+
+### 2) Apakah implementasi saat ini sudah memenuhi Continuous Integration dan Continuous Deployment?
+
+Menurut saya, implementasi saat ini **sudah memenuhi Continuous Integration** karena setiap push/pull request memicu workflow otomatis untuk menjalankan test suite dan analisis kualitas kode (CodeQL/SonarCloud jika variabel tersedia). Ini memastikan integrasi perubahan kode tidak dilakukan secara manual, serta memberi umpan balik cepat saat ada regresi. Selain itu, check status di PR membantu menjaga kualitas sebelum perubahan digabung ke branch utama.
+
+Untuk **Continuous Deployment**, implementasi ini juga sudah mengarah ke CD karena setelah perubahan masuk ke `main`, workflow deploy terpisah akan men-deploy aplikasi ke PaaS (Heroku) secara otomatis. Artinya proses rilis ke environment target tidak perlu langkah manual per deployment, selama secrets dan konfigurasi platform benar. Dengan pemisahan workflow CI dan deploy, alur juga lebih jelas: validasi kualitas dulu, lalu deployment otomatis.
