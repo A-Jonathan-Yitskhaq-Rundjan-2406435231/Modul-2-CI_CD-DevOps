@@ -54,6 +54,22 @@ class ProductServiceImplTest {
     }
 
     @Test
+    void createGeneratesIdWhenBlank() {
+        Product product = new Product();
+        product.setProductId("   ");
+        product.setProductName("Headset");
+        product.setProductQuantity(3);
+
+        productService.create(product);
+
+        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
+        verify(productRepository).create(captor.capture());
+        Product saved = captor.getValue();
+        assertNotNull(saved.getProductId());
+        assertFalse(saved.getProductId().isBlank());
+    }
+
+    @Test
     void findAllReturnsListFromRepository() {
         Product product1 = new Product();
         product1.setProductId("id-1");
