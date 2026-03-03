@@ -1,7 +1,7 @@
 package id.ac.ui.cs.advprog.eshop.service;
 
 import id.ac.ui.cs.advprog.eshop.model.Product;
-import id.ac.ui.cs.advprog.eshop.repository.ProductRepository;
+import id.ac.ui.cs.advprog.eshop.repository.ProductRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ import java.util.UUID;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository productRepository;
+    private final ProductRepositoryPort productRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepositoryPort productRepository) {
         this.productRepository = productRepository;
     }
 
