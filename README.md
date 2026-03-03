@@ -1,5 +1,7 @@
 # Eshop (Spring Boot) – Reflection
 ---
+link app : https://eshop-jonathan-278757b531e6.herokuapp.com
+---
 ## Refleksi 1
 ### Prinsip Clean Code yang Diimplementasikan
 - **Separation of Concerns**
