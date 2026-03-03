@@ -148,3 +148,64 @@ Saya memakai pendekatan bertahap: identifikasi temuan dari pipeline/check, pilih
 Menurut saya, implementasi saat ini **sudah memenuhi Continuous Integration** karena setiap push/pull request memicu workflow otomatis untuk menjalankan test suite dan analisis kualitas kode (CodeQL/SonarCloud jika variabel tersedia). Ini memastikan integrasi perubahan kode tidak dilakukan secara manual, serta memberi umpan balik cepat saat ada regresi. Selain itu, check status di PR membantu menjaga kualitas sebelum perubahan digabung ke branch utama.
 
 Untuk **Continuous Deployment**, implementasi ini juga sudah mengarah ke CD karena setelah perubahan masuk ke `main`, workflow deploy terpisah akan men-deploy aplikasi ke PaaS (Heroku) secara otomatis. Artinya proses rilis ke environment target tidak perlu langkah manual per deployment, selama secrets dan konfigurasi platform benar. Dengan pemisahan workflow CI dan deploy, alur juga lebih jelas: validasi kualitas dulu, lalu deployment otomatis.
+
+---
+
+## Refleksi 4 - SOLID Principles
+
+### 1) Explain what principles you apply to your project!
+
+Saya menerapkan prinsip SOLID berikut pada project ini:
+
+- **Single Responsibility Principle (SRP)**  
+  Tanggung jawab dibagi per layer:
+  - `ProductController` dan `CarController` menangani HTTP request/response dan view rendering.
+  - `ProductServiceImpl` dan `CarServiceImpl` menangani logika aplikasi.
+  - `ProductRepository` dan `CarRepository` menangani penyimpanan data.
+
+- **Open/Closed Principle (OCP)**  
+  Melakukan abstraction (interface), seperti `ProductService`, `CarService`, `ProductRepositoryPort`, dan `CarRepositoryPort`.  
+  Dengan ini, perilaku bisa diperluas (misalnya ganti repository in-memory ke database) tanpa mengubah controller.
+
+- **Liskov Substitution Principle (LSP)**  
+  Implementasi service (`ProductServiceImpl`, `CarServiceImpl`) bisa dipakai sebagai substitusi interface service di controller selama kontraknya sama.
+
+- **Interface Segregation Principle (ISP)**  
+  Interface dipisah berdasarkan domain (`ProductService` vs `CarService`, `ProductRepositoryPort` vs `CarRepositoryPort`) agar client tidak bergantung pada method yang tidak dibutuhkan.
+
+- **Dependency Inversion Principle (DIP)**  
+  Controller bergantung pada abstraction (`ProductService`, `CarService`) dan service bergantung pada abstraction repository (`ProductRepositoryPort`, `CarRepositoryPort`) melalui constructor injection.
+
+### 2) Explain the advantages of applying SOLID principles to your project with examples.
+
+Keuntungan yang terasa di project ini:
+
+- **Mudah di-test**  
+  Karena dependency berbasis interface, test bisa memakai mock/stub dengan mudah.  
+  Contoh: `ProductControllerTest` cukup mock `ProductService` tanpa inisialisasi repository asli.
+
+- **Lebih mudah di-maintain**  
+  Perubahan di satu layer tidak langsung merusak layer lain.  
+  Contoh: perubahan cara generate `productId` cukup dilakukan di service/repository tanpa mengubah controller/view.
+
+- **Lebih fleksibel untuk pengembangan fitur**  
+  Menambah fitur `Car` bisa memakai pola yang sama dengan `Product` (controller-service-repository) sehingga konsisten dan cepat dikembangkan.
+
+- **Coupling lebih rendah**  
+  Karena mengikuti DIP, class-level dependency lebih longgar dan lebih aman terhadap refactor.
+
+### 3) Explain the disadvantages of not applying SOLID principles to your project with examples.
+
+Jika SOLID tidak diterapkan, risikonya:
+
+- **Class jadi “god class” dan sulit dirawat (melanggar SRP)**  
+  Jika controller juga menangani logika bisnis dan penyimpanan, file akan membesar, sulit dibaca, dan rawan bug saat perubahan kecil.
+
+- **Sulit mengganti implementasi (melanggar OCP/DIP)**  
+  Jika controller bergantung langsung ke class konkret repository, saat migrasi dari in-memory ke database kita harus ubah banyak file sekaligus.
+
+- **Testing jadi mahal dan rapuh**  
+  Tanpa abstraction, unit test harus menjalankan banyak dependency nyata dan setup yang lebih kompleks.
+
+- **Kontrak antar komponen jadi tidak konsisten (melanggar LSP/ISP)**  
+  Misalnya jika sebagian method return `null`, sebagian lain throw exception tanpa aturan yang jelas, client code akan penuh `if/else` defensif dan perilaku aplikasi tidak stabil.
