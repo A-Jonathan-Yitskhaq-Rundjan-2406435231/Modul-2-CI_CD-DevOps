@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Detail</title>
+</head>
+<body>
+<h3>Payment Detail</h3>
+<form id="paymentDetailForm">
+    <label for="paymentIdInput">Payment ID</label>
+    <input id="paymentIdInput" name="paymentId" type="text"/>
+    <button type="submit">Search</button>
+</form>
+<script>
+    document.getElementById('paymentDetailForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const paymentId = document.getElementById('paymentIdInput').value;
+        if (paymentId) {
+            window.location.href = '/payment/detail/' + paymentId;
+        }
+    });
+</script>
+</body>
+</html>
