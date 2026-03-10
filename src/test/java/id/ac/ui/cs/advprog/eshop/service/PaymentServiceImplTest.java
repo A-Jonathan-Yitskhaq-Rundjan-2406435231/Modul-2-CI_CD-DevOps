@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,100 @@ class PaymentServiceImplTest {
     }
 
     @Test
+    void addPaymentVoucherInvalidLengthIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                Map.of("voucherCode", "ESHOP1234ABC56")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherInvalidPrefixIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                Map.of("voucherCode", "NOPE1234ABCD5678")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherInvalidDigitCountIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                Map.of("voucherCode", "ESHOPABCDXYZ1234")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherMissingDataIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                null
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherMissingCodeIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                Map.of()
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherBlankCodeIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                Map.of("voucherCode", " ")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentVoucherNullCodeIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", null);
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_VOUCHER,
+                data
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
     void addPaymentCodInvalidIsRejected() {
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -96,6 +191,84 @@ class PaymentServiceImplTest {
     }
 
     @Test
+    void addPaymentCodMissingFeeIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_COD,
+                Map.of("address", "Depok")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentCodNullDataIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_COD,
+                null
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentBankTransferValidIsSuccess() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_BANK_TRANSFER,
+                Map.of("bankName", "BCA", "referenceCode", "REF123")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_SUCCESS, result.getStatus());
+    }
+
+    @Test
+    void addPaymentBankTransferMissingDataIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_BANK_TRANSFER,
+                Map.of("bankName", "BCA")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentBankTransferMissingBankNameIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                PaymentServiceImpl.METHOD_BANK_TRANSFER,
+                Map.of("referenceCode", "REF123")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
+    void addPaymentUnknownMethodIsRejected() {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.addPayment(
+                order,
+                "UNKNOWN",
+                Map.of("foo", "bar")
+        );
+
+        assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
+    }
+
+    @Test
     void setStatusSuccessUpdatesOrderStatusToSuccess() {
         Payment payment = new Payment();
         payment.setId("payment-1");
@@ -119,6 +292,19 @@ class PaymentServiceImplTest {
 
         assertEquals(PaymentServiceImpl.STATUS_REJECTED, result.getStatus());
         assertEquals(OrderStatus.FAILED.getValue(), order.getStatus());
+    }
+
+    @Test
+    void setStatusOtherDoesNotChangeOrderStatus() {
+        Payment payment = new Payment();
+        payment.setId("payment-1");
+        payment.setOrder(order);
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Payment result = paymentService.setStatus(payment, "PENDING");
+
+        assertEquals("PENDING", result.getStatus());
+        assertEquals(OrderStatus.WAITING_PAYMENT.getValue(), order.getStatus());
     }
 
     @Test

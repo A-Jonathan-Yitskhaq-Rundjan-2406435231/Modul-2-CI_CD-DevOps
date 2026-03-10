@@ -78,6 +78,21 @@ public class ProductRepositoryTest {
     }
 
     @Test
+    void testFindByIdFindsSecondItem() {
+        Product product1 = new Product();
+        product1.setProductId("id-1");
+        productRepository.create(product1);
+
+        Product product2 = new Product();
+        product2.setProductId("id-2");
+        productRepository.create(product2);
+
+        Product found = productRepository.findById("id-2");
+        assertNotNull(found);
+        assertEquals("id-2", found.getProductId());
+    }
+
+    @Test
     void testFindByIdReturnsNullWhenMissing() {
         Product found = productRepository.findById("missing-id");
         assertNull(found);
@@ -95,6 +110,17 @@ public class ProductRepositoryTest {
 
         assertNull(productRepository.findById("id-1"));
         assertFalse(productRepository.findAll().hasNext());
+    }
+
+    @Test
+    void testDeleteByIdNoopWhenMissing() {
+        Product product = new Product();
+        product.setProductId("id-1");
+        productRepository.create(product);
+
+        productRepository.deleteById("missing-id");
+
+        assertNotNull(productRepository.findById("id-1"));
     }
 
     @Test
@@ -116,6 +142,29 @@ public class ProductRepositoryTest {
         Product stored = productRepository.findById("id-1");
         assertEquals("Sabun Baru", stored.getProductName());
         assertEquals(20, stored.getProductQuantity());
+    }
+
+    @Test
+    void testEditSecondItem() {
+        Product product1 = new Product();
+        product1.setProductId("id-1");
+        productRepository.create(product1);
+
+        Product product2 = new Product();
+        product2.setProductId("id-2");
+        product2.setProductName("Sabun");
+        product2.setProductQuantity(10);
+        productRepository.create(product2);
+
+        Product updated = new Product();
+        updated.setProductId("id-2");
+        updated.setProductName("Sabun Baru");
+        updated.setProductQuantity(20);
+
+        Product result = productRepository.edit(updated);
+        assertNotNull(result);
+        Product stored = productRepository.findById("id-2");
+        assertEquals("Sabun Baru", stored.getProductName());
     }
 
     @Test

@@ -76,6 +76,15 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+    classDirectories.setFrom(
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude("**/*Port.*", "**/EshopApplication.*")
+                }
+            }
+        )
+    )
 }
 
 sonar {

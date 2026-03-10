@@ -11,6 +11,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class PaymentRepositoryTest {
     private PaymentRepository paymentRepository;
@@ -35,6 +36,30 @@ class PaymentRepositoryTest {
         assertNotNull(result);
         assertEquals("payment-1", result.getId());
         assertEquals("SUCCESS", result.getStatus());
+    }
+
+    @Test
+    void getPaymentReturnsNullWhenMissing() {
+        paymentRepository.save(payment);
+        Payment result = paymentRepository.getPayment("missing");
+        assertNull(result);
+    }
+
+    @Test
+    void getPaymentFindsSecondItem() {
+        Payment payment2 = new Payment();
+        payment2.setId("payment-2");
+        payment2.setMethod("CASH_ON_DELIVERY");
+        payment2.setStatus("SUCCESS");
+        payment2.setPaymentData(Map.of("address", "UI", "deliveryFee", "10000"));
+        payment2.setOrder(new Order("order-2", List.of(createProduct()), 1708560000L, "Safira"));
+
+        paymentRepository.save(payment);
+        paymentRepository.save(payment2);
+
+        Payment result = paymentRepository.getPayment("payment-2");
+        assertNotNull(result);
+        assertEquals("payment-2", result.getId());
     }
 
     @Test
