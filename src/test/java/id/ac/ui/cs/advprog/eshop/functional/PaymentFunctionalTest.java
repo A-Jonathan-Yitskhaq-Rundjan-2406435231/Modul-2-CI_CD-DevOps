@@ -7,10 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,7 +54,11 @@ class PaymentFunctionalTest {
         driver.findElement(By.id("voucherCodeInput")).sendKeys("ESHOP1234ABC5678");
         driver.findElement(By.cssSelector("button[type='submit']")).click();
 
-        String paymentId = driver.findElement(By.id("paymentIdValue")).getText();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement paymentIdEl = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("paymentIdValue"))
+        );
+        String paymentId = paymentIdEl.getText();
         String status = driver.findElement(By.id("paymentStatusValue")).getText();
         assertTrue(status.contains("SUCCESS"));
 
