@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Created</title>
+</head>
+<body>
+<h3>Order Created</h3>
+<p>Order ID: <span id="orderIdValue" th:text="${order.id}">order-id</span></p>
+<p>Status: <span id="orderStatusValue" th:text="${order.status}">status</span></p>
+<a th:href="@{/order/pay/{orderId}(orderId=${order.id})}">Pay this order</a>
+</body>
+</html>
